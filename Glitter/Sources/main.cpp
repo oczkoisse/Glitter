@@ -67,31 +67,40 @@ int main(int argc, char *argv[]) {
 
 
     // 1. Bind vertex array object
-    unsigned int vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    unsigned int vao[2];
+    glGenVertexArrays(2, vao);
 
+    unsigned int vbo[2];
+    glGenBuffers(2, vbo);
+    
     // Note that these values are already in NDC
-    float vertices[] = {
+    // First triangle
+    float vertices1[] = {
         -0.5f, 0.5f, 0.0f,
         -1.0f, -0.5f, 0.0f,
-         0.0f, -0.5f, 0.0f,
+         0.0f, -0.5f, 0.0f
+    };
+
+    // Second triangle
+    float vertices2[] = {
          0.0f, -0.5f, 0.0f,
          0.5f, 0.5f, 0.0f,
          1.0f, -0.5f, 0.0f
     };
 
-    // 2. Bind and set vertex buffers
-    unsigned int vbo;
-    glGenBuffers(1, &vbo);
-    // Bind the buffer to a target
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    // Send data to target
-    // GL_STATIC_DRAW means the data is set only once and used many times
-    // This hint allows a GPU to store the data in appropriate memory
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBindVertexArray(vao[0]);
 
-    // 3. Configure vertex attributes
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices1), vertices1, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void *)0);
+    glEnableVertexAttribArray(0);
+
+    glBindVertexArray(vao[1]);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
+
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
@@ -157,12 +166,19 @@ int main(int argc, char *argv[]) {
         // Clear the color buffer
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(vao[0]);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindVertexArray(vao[1]);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         // Flip buffers and draw (using double buffers)
         glfwSwapBuffers(mWindow);
         glfwPollEvents();
     }
+
+    glDeleteVertexArrays(2, vao);
+    glDeleteBuffers(2, vbo);
+    glDeleteProgram(shaderProgram);
     
     glfwTerminate();
     return EXIT_SUCCESS;
