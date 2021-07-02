@@ -31,6 +31,16 @@ void main() {
 }
 )";
 
+const char *fragShader2Source = R"(
+# version 330 core
+
+out vec4 fragColor;
+
+void main() {
+    fragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f);
+}
+)";
+
 void resize_callback(GLFWwindow *window, int width, int height) {
     glViewport(0, 0, width, height);
 }
@@ -130,6 +140,19 @@ int main(int argc, char *argv[]) {
         std::cerr << "ERROR: Fragment shader compilation failed\n" << infoLog << std::endl;
     }
 
+    unsigned int fragShader2;
+    fragShader2 = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragShader2, 1, &fragShader2Source, nullptr);
+    glCompileShader(fragShader2);
+
+    int fsuccess2;
+    glGetShaderiv(fragShader2, GL_LINK_STATUS, &fsuccess2);
+    if (!fsuccess2) {
+        char infoLog[512];
+        glGetShaderInfoLog(fragShader2, 512, nullptr, infoLog);
+        std::cerr << "ERROR: Fragment shader 2 compilation failed\n" << infoLog << std::endl;
+    }
+
     unsigned int shaderProgram;
     shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
@@ -144,10 +167,24 @@ int main(int argc, char *argv[]) {
         std::cerr << "ERROR: Program linking failed\n" << infoLog << std::endl;
     }
 
+    unsigned int shaderProgram2;
+    shaderProgram2 = glCreateProgram();
+    glAttachShader(vertexShader, vertexShader);
+    glAttachShader(shaderProgram2, fragShader2);
+    glLinkProgram(shaderProgram2);
 
-    glUseProgram(shaderProgram);
+    int p2success;
+    glGetProgramiv(shaderProgram2, GL_LINK_STATUS, &p2success);
+    if (!p2success) {
+        char infoLog[512];
+        glGetProgramInfoLog(shaderProgram2, 512, nullptr, infoLog);
+        std::cerr << "ERROR: Program 2 linking failed\n" << infoLog << std::endl;
+    }
+
+
     glDeleteShader(vertexShader);
     glDeleteShader(fragShader);
+    glDeleteShader(fragShader2);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     
@@ -166,8 +203,11 @@ int main(int argc, char *argv[]) {
         // Clear the color buffer
         glClear(GL_COLOR_BUFFER_BIT);
 
+        glUseProgram(shaderProgram);
         glBindVertexArray(vao[0]);
         glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        glUseProgram(shaderProgram2);
         glBindVertexArray(vao[1]);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
@@ -179,6 +219,7 @@ int main(int argc, char *argv[]) {
     glDeleteVertexArrays(2, vao);
     glDeleteBuffers(2, vbo);
     glDeleteProgram(shaderProgram);
+    glDeleteProgram(shaderProgram2);
     
     glfwTerminate();
     return EXIT_SUCCESS;
