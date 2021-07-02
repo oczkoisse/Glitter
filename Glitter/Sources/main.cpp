@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
     glCompileShader(fragShader2);
 
     int fsuccess2;
-    glGetShaderiv(fragShader2, GL_LINK_STATUS, &fsuccess2);
+    glGetShaderiv(fragShader2, GL_COMPILE_STATUS, &fsuccess2);
     if (!fsuccess2) {
         char infoLog[512];
         glGetShaderInfoLog(fragShader2, 512, nullptr, infoLog);
@@ -169,7 +169,7 @@ int main(int argc, char *argv[]) {
 
     unsigned int shaderProgram2;
     shaderProgram2 = glCreateProgram();
-    glAttachShader(vertexShader, vertexShader);
+    glAttachShader(shaderProgram2, vertexShader);
     glAttachShader(shaderProgram2, fragShader2);
     glLinkProgram(shaderProgram2);
 
