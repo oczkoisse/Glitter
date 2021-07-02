@@ -73,10 +73,12 @@ int main(int argc, char *argv[]) {
 
     // Note that these values are already in NDC
     float vertices[] = {
-         0.5f,  0.5f, 0.0f, // Top right rectangle vertex, 0
-         0.5f, -0.5f, 0.0f, // Bottom right rectangle vertex, 1
-        -0.5f, -0.5f, 0.0f, // Bottom left rectangle vertex, 2
-        -0.5f,  0.5f, 0.0f  // Top left rectangle vertex, 3
+        -0.5f, 0.5f, 0.0f,
+        -1.0f, -0.5f, 0.0f,
+         0.0f, -0.5f, 0.0f,
+         0.0f, -0.5f, 0.0f,
+         0.5f, 0.5f, 0.0f,
+         1.0f, -0.5f, 0.0f
     };
 
     // 2. Bind and set vertex buffers
@@ -88,33 +90,6 @@ int main(int argc, char *argv[]) {
     // GL_STATIC_DRAW means the data is set only once and used many times
     // This hint allows a GPU to store the data in appropriate memory
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // Indexed drawing
-    unsigned int indices[] = {
-        /**
-         * 3 _ _ 0
-         *   \  |
-         *    \ |
-         *     \|
-         *      1
-         */
-        0, 1, 3,
-        /**
-         * 3
-         * |\
-         * | \
-         * |  \
-         * |_ _\
-         * 2    1
-         */
-        1, 2, 3
-    };
-
-    // Create and bind an element buffer object for the indices
-    unsigned int ebo;
-    glGenBuffers(1, &ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices, GL_STATIC_DRAW);
 
     // 3. Configure vertex attributes
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void *)0);
@@ -182,7 +157,7 @@ int main(int argc, char *argv[]) {
         // Clear the color buffer
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)0);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         // Flip buffers and draw (using double buffers)
         glfwSwapBuffers(mWindow);
